@@ -1,0 +1,49 @@
+name: workflow.yml
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Quellcode aus dem Repository laden
+      - name: Repository auschecken
+        uses: actions/checkout@v3
+
+      # Java-Laufzeitumgebung einrichten
+      - name: Java einrichten
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Gradle Wrapper ausführbar machen
+      - name: Gradle Wrapper vorbereiten
+        run: chmod +x ./gradlew
+
+      # Build und Tests ausführen
+      - name: Projekt bauen und Tests ausführen
+        run: ./gradlew clean build
+
+      # Login in die GitHub Container Registry (GHCR)
+      - name: Login bei GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Docker-Image erstellen
+      - name: Docker Image bauen
+        run: docker build -t ghcr.io/hafa39/order-service:latest .
+
+      # Docker-Image in die Registry pushen
+      - name: Docker Image pushen
+        run: docker push ghcr.io/hafa39/order-service:latest
+
