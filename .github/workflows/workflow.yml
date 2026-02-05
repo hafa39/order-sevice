@@ -6,6 +6,9 @@ on:
   pull_request:
     branches:
       - main
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: hafa39/order-service
 
 jobs:
   build-test-and-publish:
@@ -41,9 +44,9 @@ jobs:
 
       # Docker-Image erstellen
       - name: Docker Image bauen
-        run: docker build -t ghcr.io/hafa39/order-service:latest .
+        run: docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
 
       # Docker-Image in die Registry pushen
       - name: Docker Image pushen
-        run: docker push ghcr.io/hafa39/order-service:latest
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
